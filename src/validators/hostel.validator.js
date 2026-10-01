@@ -9,8 +9,9 @@ const createHostelRules = [
   body('images').optional().isArray().withMessage('Images must be an array of URL strings.'),
   body('availability')
     .optional()
-    .isIn(['available', 'occupied', 'reserved'])
-    .withMessage('Availability must be available, occupied, or reserved.'),
+    .isIn(['available', 'occupied', 'reserved', 'maintenance'])
+    .withMessage('Availability must be available, occupied, reserved, or maintenance.'),
+  body('contactPhone').optional().isString().withMessage('Contact phone must be a string.'),
 ];
 
 module.exports = {

@@ -33,7 +33,7 @@ const hostelSchema = new mongoose.Schema(
     },
     availability: {
       type: String,
-      enum: ['available', 'occupied', 'reserved'],
+      enum: ['available', 'occupied', 'reserved', 'maintenance'],
       default: 'available',
     },
     rating: {
@@ -52,9 +52,30 @@ const hostelSchema = new mongoose.Schema(
       required: true,
     },
     coordinates: {
-      lat: { type: Number, default: null },
-      lng: { type: Number, default: null },
+      type: { type: String, enum: ['Point'], default: 'Point' },
+      coordinates: { type: [Number] }, // [lng, lat]
     },
+    contactPhone: {
+      type: String,
+      trim: true,
+    },
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
+    roomType: {
+      type: String,
+      enum: ['single', 'shared', 'any'],
+      default: 'any',
+    },
+    genderPolicy: {
+      type: String,
+      enum: ['mixed', 'male-only', 'female-only'],
+      default: 'mixed',
+    },
+    security: { type: Number, default: 0 },
+    sanitation: { type: Number, default: 0 },
+    internet: { type: Number, default: 0 },
   },
   {
     timestamps: true,
@@ -70,5 +91,6 @@ const hostelSchema = new mongoose.Schema(
 );
 
 hostelSchema.index({ title: 'text', description: 'text' });
+hostelSchema.index({ coordinates: '2dsphere' });
 
 module.exports = mongoose.model('Hostel', hostelSchema);

@@ -3,6 +3,7 @@ const {
   requestBooking,
   listUserBookings,
   updateBookingStatus,
+  cancelBooking,
 } = require('../../controllers/booking.controller');
 const { protect, authorize } = require('../../middleware/auth');
 const validate = require('../../middleware/validate');
@@ -29,5 +30,6 @@ router.patch(
   validate,
   updateBookingStatus
 );
+router.delete('/:id', protect, cancelBooking);
 
 module.exports = router;

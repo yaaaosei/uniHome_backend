@@ -120,8 +120,44 @@ const updateBookingStatus = async (req, res, next) => {
   }
 };
 
+// @desc    Cancel/Delete booking
+// @route   DELETE /api/v1/bookings/:id
+// @access  Private (Owning Student, Admin)
+const cancelBooking = async (req, res, next) => {
+  try {
+    const booking = await Booking.findById(req.params.id);
+
+    if (!booking) {
+      return res.status(404).json({
+        error: 'NOT_FOUND',
+        message: `Booking with ID '${req.params.id}' was not found.`,
+      });
+    }
+
+    const isStudentOwner = booking.userId && booking.userId.toString() === req.user._id.toString();
+    const isAdmin = req.user.role === 'admin';
+
+    if (!isStudentOwner && !isAdmin) {
+      return res.status(403).json({
+        error: 'FORBIDDEN',
+        message: 'You are not authorized to cancel this booking.',
+      });
+    }
+
+    await booking.deleteOne();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Booking cancelled successfully.',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   requestBooking,
   listUserBookings,
   updateBookingStatus,
+  cancelBooking,
 };

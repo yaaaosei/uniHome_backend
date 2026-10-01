@@ -174,7 +174,20 @@ const createHostel = async (req, res, next) => {
       images,
       availability,
       coordinates,
+      contactPhone,
     } = req.body;
+
+    let formattedCoordinates = null;
+    if (coordinates) {
+      if (coordinates.type === 'Point' && Array.isArray(coordinates.coordinates) && coordinates.coordinates.length === 2) {
+        formattedCoordinates = coordinates;
+      } else if (typeof coordinates.lng === 'number' && typeof coordinates.lat === 'number') {
+        formattedCoordinates = {
+          type: 'Point',
+          coordinates: [coordinates.lng, coordinates.lat]
+        };
+      }
+    }
 
     const hostel = await Hostel.create({
       title,
@@ -184,7 +197,8 @@ const createHostel = async (req, res, next) => {
       amenities: amenities || [],
       images: images || [],
       availability: availability || 'available',
-      coordinates: coordinates || { lat: null, lng: null },
+      coordinates: formattedCoordinates,
+      contactPhone,
       landlordId: req.user._id,
     });
 
@@ -201,9 +215,43 @@ const createHostel = async (req, res, next) => {
   }
 };
 
+
+
+// @desc    Update hostel availability
+// @route   PATCH /api/v1/hostels/:id/availability
+// @access  Private (Landlord, Admin)
+const updateAvailability = async (req, res, next) => {
+  try {
+    const { availability } = req.body;
+
+    if (!availability) {
+      return res.status(400).json({ error: 'BAD_REQUEST', message: 'Availability is required' });
+    }
+
+    const hostel = await Hostel.findById(req.params.id);
+
+    if (!hostel) {
+      return res.status(404).json({ error: 'NOT_FOUND', message: 'Hostel not found' });
+    }
+
+    // Check ownership or admin
+    if (hostel.landlordId.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'FORBIDDEN', message: 'Not authorized to update this hostel' });
+    }
+
+    hostel.availability = availability;
+    await hostel.save();
+
+    return res.status(200).json(hostel);
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   searchHostels,
   getFilterMetadata,
   getHostelById,
   createHostel,
+  updateAvailability,
 };

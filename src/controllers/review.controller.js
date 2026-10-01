@@ -70,7 +70,33 @@ const postReview = async (req, res, next) => {
   }
 };
 
+// @desc    Get reviews submitted by current user
+// @route   GET /api/v1/reviews/me
+// @access  Private
+const getUserReviews = async (req, res, next) => {
+  try {
+    const reviews = await Review.find({ userId: req.user._id })
+      .populate('hostelId', 'title')
+      .sort({ createdAt: -1 });
+
+    const formatted = reviews.map((review) => {
+      const json = review.toJSON();
+      json.userName = req.user.name;
+      json.hostelTitle = review.hostelId ? review.hostelId.title : 'Hostel';
+      json.createdAt = review.createdAt
+        ? review.createdAt.toISOString().split('T')[0]
+        : new Date().toISOString().split('T')[0];
+      return json;
+    });
+
+    return res.status(200).json(formatted);
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getReviewsForHostel,
   postReview,
+  getUserReviews,
 };

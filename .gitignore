@@ -1,2 +1,30 @@
-node_modules
+# Dependencies
+node_modules/
+
+# Environment variables / secrets
 .env
+.env.*
+!.env.example
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Uploaded files
+uploads/
+
+# Seed / local data
+seed-data.json
+
+# Local/editor files
+.vscode/
+.idea/
+.DS_Store
+*.code-workspace
+
+# Project documents
+chapters/
