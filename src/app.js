@@ -9,7 +9,25 @@ const v1Routes = require('./routes/v1');
 const app = express();
 
 app.use(helmet({ crossOriginResourcePolicy: false })); // allow static image serving cross-origin
-app.use(cors({ origin: process.env.CLIENT_URL || '*' }));
+const allowedOrigins = [
+  "http://localhost:8080",
+  "http://localhost:5173",
+  "https://uni-home-eosin.vercel.app",
+];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 // Increase JSON payload limit to handle fallback Base64 if needed
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
